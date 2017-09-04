@@ -1,0 +1,29 @@
+{
+  "name": "splitxlsx",
+  "version": "0.0.1",
+  "description": "Splits Excel files into files based on collections of N rows",
+  "main": "index.js",
+  "scripts": {
+    "test": "n/a"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NickDMansfield/splitXLSX.git"
+  },
+  "keywords": [
+    "XLSX",
+    "excel",
+    "split"
+  ],
+  "author": "Nickdmansfield@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NickDMansfield/splitXLSX/issues"
+  },
+  "homepage": "https://github.com/NickDMansfield/splitXLSX#readme",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "fs": "0.0.1-security",
+    "msexcel-builder": "0.0.2"
+  }
+}
