@@ -1,6 +1,6 @@
 {
   "name": "splitxlsx",
-  "version": "0.0.1",
+  "version": "0.0.8",
   "description": "Splits Excel files into files based on collections of N rows",
   "main": "index.js",
   "scripts": {
@@ -22,8 +22,15 @@
   },
   "homepage": "https://github.com/NickDMansfield/splitXLSX#readme",
   "dependencies": {
+    "async-xlsx": "0.0.7",
     "bluebird": "^3.5.0",
+    "commander": "^2.11.0",
     "fs": "0.0.1-security",
-    "msexcel-builder": "0.0.2"
+    "lodash": "^4.17.4",
+    "msexcel-builder": "0.0.2",
+    "xlsx": "^0.11.3"
+  },
+  "bin": {
+    "splitxlsx": "index.js"
   }
 }
