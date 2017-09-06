@@ -14,22 +14,34 @@ const _ = require('lodash');
 
 program
   .version('0.0.1')
+  .option('-J, --settingsJSON <settingsJSON>', 'settings JSON file')
   .option('-S, --source <source>', 'data source')
   .option('-N, --lines <lines>', 'line count')
   .option('-O, --output <output>', 'output folder')
   .option('-W, --worksheet <worksheet>', 'worksheet')
   .parse(process.argv);
 
-  function Workbook() {
-  	if(!(this instanceof Workbook)) return new Workbook();
-  	this.SheetNames = [];
-  	this.Sheets = {};
-  }
+const splitSettings = require(process.cwd() + '/' + program.settingsJSON);
+
+function Workbook() {
+	if(!(this instanceof Workbook)) return new Workbook();
+	 this.SheetNames = [];
+	 this.Sheets = {};
+}
 
   function datenum(v, date1904) {
-  if(date1904) v+=1462;
-  var epoch = Date.parse(v);
-  return (epoch - new Date(Date.UTC(1899, 11, 30))) / (24 * 60 * 60 * 1000);
+    if (date1904) v += 1462;
+    var epoch = Date.parse(v);
+    return (epoch - new Date(Date.UTC(1899, 11, 30))) / (24 * 60 * 60 * 1000);
+  }
+
+  function numdate(v) {
+  	var startDate = xlsx2.SSF.parse_date_code(v);
+  	var val = new Date();
+  	if(startDate !== null) {
+    	val = startDate.m + '/' + startDate.d + '/' + startDate.y;
+    }
+  	return val;
   }
 
   function sheet_from_array_of_arrays(data, opts) {
@@ -48,8 +60,9 @@ program
   		if(typeof cell.v === 'number') cell.t = 'n';
   		else if(typeof cell.v === 'boolean') cell.t = 'b';
   		else if(cell.v instanceof Date) {
-  			cell.t = 'n'; cell.z = xlsx2.SSF._table[14];
-  			cell.v = datenum(cell.v);
+  			cell.t = 'd';
+        cell.z = 'dd/mm/yyyy';
+  			cell.v = numdate(cell.v);
   		}
   		else cell.t = 's';
 
@@ -60,11 +73,27 @@ program
     return ws;
   }
 
+const tweakData = (sheetName, dataArray) => {
+  // Expects a 2d array
+  const newData = JSON.parse(JSON.stringify(dataArray));
+  for (let zz = 0; zz < splitSettings.forceTypes.length; ++zz) {
+    const forceType = splitSettings.forceTypes[zz];
+    if (forceType.sheetName === sheetName) {
+      // Only apply to matching sheets, ya goober
+      for (let yy = forceType.startIndex || 0; yy < newData.length; ++yy) {
+        const row = newData[yy];
+        console.log(row);
+        row[forceType.index] = numdate(row[forceType.index]);
+      }
+    }
+  }
+  return newData;
+};
 // 2. Load file into memory and create copy of workbook
 return xlsx.parseFileAsync((process.cwd() + '/' + program.source), {}, workbookData => {
   const wbData = JSON.parse(JSON.stringify(workbookData));
   // Result is a 2D array with an object with name/data props for each worksheet
-  // console.log(JSON.stringify(wbData, 0, 2));
+   //console.log(JSON.stringify(wbData, 0, 2));
 
   // 3. Isolate data array of rows on target spreadsheet
   const dataSet = _.find(wbData, { name: program.worksheet }).data;
@@ -72,13 +101,17 @@ return xlsx.parseFileAsync((process.cwd() + '/' + program.source), {}, workbookD
   const loadedSheets = {};
   _.map(sheetNames, sheetname => {
     const sheet = _.find(wbData, { name: sheetname });
+    // Apply force types
+    sheet.data = tweakData(sheetname, sheet.data);
+    console.log(JSON.stringify(sheet, 0, 2));
     loadedSheets[sheetname] = sheet_from_array_of_arrays(sheet.data);
   });
   const lineCount = Number(program.lines);
   // 4a. Loop through the array of rows to build subsets
-  for (let startIndex = 0; startIndex < (dataSet.length % lineCount === 0 ? dataSet.length / lineCount : dataSet.length / lineCount + 1); ++startIndex) {
-    const subset = dataSet.slice((startIndex * lineCount) + 1, (startIndex + 1) * lineCount);
+  for (let startIndex = 0; startIndex < (dataSet.length % lineCount === 0 ? dataSet.length / lineCount : dataSet.length / lineCount); ++startIndex) {
+    let subset = dataSet.slice((startIndex * lineCount) + 1, (startIndex + 1) * lineCount);
     // Add headers into data
+    subset = tweakData(program.worksheet, subset);
     subset.unshift(dataSet[0]);
     const workBook = { SheetNames: sheetNames, Sheets: loadedSheets };
     // 4b. Add each subset to a temporary copy of the workbook

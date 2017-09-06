@@ -1,0 +1,21 @@
+{
+  "forceTypes": [
+    {
+      "type": "date",
+      "index": 4,
+      "sheetName": "Student"
+    },
+    {
+      "type": "date",
+      "index": 2,
+      "sheetName": "Subscription",
+      "startIndex": 1
+    },
+    {
+      "type": "date",
+      "index": 1,
+      "sheetName": "Subscription",
+      "startIndex": 1
+    }
+  ]
+}
