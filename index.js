@@ -39,7 +39,7 @@ function Workbook() {
   	var startDate = xlsx2.SSF.parse_date_code(v);
   	var val = new Date();
   	if(startDate !== null) {
-    	val = startDate.m + '/' + startDate.d + '/' + startDate.y;
+    	val = startDate.m + '/' + startDate.d + '/' + startDate.y.toString().slice(2, 4);
     }
   	return val;
   }
@@ -61,7 +61,7 @@ function Workbook() {
   		else if(typeof cell.v === 'boolean') cell.t = 'b';
   		else if(cell.v instanceof Date) {
   			cell.t = 'd';
-        cell.z = 'dd/mm/yyyy';
+        cell.z = 'dd/mm/yy';
   			cell.v = numdate(cell.v);
   		}
   		else cell.t = 's';

@@ -1,6 +1,6 @@
 {
   "name": "splitxlsx",
-  "version": "0.0.22",
+  "version": "0.0.26",
   "description": "Splits Excel files into files based on collections of N rows",
   "main": "index.js",
   "scripts": {
